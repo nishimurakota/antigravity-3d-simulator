@@ -160,22 +160,22 @@ function App() {
                 {/* Row 1: Left-Top (-Z CCW), Top (+X Up), Right-Top (+Z CW) */}
                 <button
                   className="dpad-btn diagonal-btn"
-                  onClick={() => rotateBox('z', -1)}
-                  title="左上: -Z 回転 (反時計回り)"
+                  onClick={() => rotateBox('z', 1)}
+                  title="反時計回り"
                 >
                   <RotateCcw size={17} />
                 </button>
                 <button
                   className="dpad-btn straight-btn"
-                  onClick={() => rotateBox('x', 1)}
-                  title="上: +X 回転"
+                  onClick={() => rotateBox('x', -1)}
+                  title="上回転"
                 >
                   <ArrowUp size={17} />
                 </button>
                 <button
                   className="dpad-btn diagonal-btn"
-                  onClick={() => rotateBox('z', 1)}
-                  title="右上: +Z 回転 (時計回り)"
+                  onClick={() => rotateBox('z', -1)}
+                  title="時計回り"
                 >
                   <RotateCw size={17} />
                 </button>
@@ -184,7 +184,7 @@ function App() {
                 <button
                   className="dpad-btn straight-btn"
                   onClick={() => rotateBox('y', -1)}
-                  title="左: -Y 回転"
+                  title="左回転"
                 >
                   <ArrowLeft size={17} />
                 </button>
@@ -198,7 +198,7 @@ function App() {
                 <button
                   className="dpad-btn straight-btn"
                   onClick={() => rotateBox('y', 1)}
-                  title="右: +Y 回転"
+                  title="右回転"
                 >
                   <ArrowRight size={17} />
                 </button>
@@ -207,8 +207,8 @@ function App() {
                 <div className="dpad-spacer" />
                 <button
                   className="dpad-btn straight-btn"
-                  onClick={() => rotateBox('x', -1)}
-                  title="下: -X 回転"
+                  onClick={() => rotateBox('x', 1)}
+                  title="下回転"
                 >
                   <ArrowDown size={17} />
                 </button>
