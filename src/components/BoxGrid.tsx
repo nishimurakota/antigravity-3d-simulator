@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Edges } from '@react-three/drei';
+import { Edges, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useStore } from '../store';
 
@@ -38,8 +38,31 @@ export default function BoxGrid() {
       <mesh>
         <boxGeometry args={[3 * spacing, 3 * spacing, 3 * spacing]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        <Edges scale={1} threshold={15} color="#3b82f6" opacity={0.3} transparent />
+        <Edges scale={1} threshold={15} color="#94a3b8" opacity={0.25} transparent />
       </mesh>
+
+      {/* Front Face Indicator (+Z direction) */}
+      <group position={[0, 0, 1.5 * spacing + 0.01]}>
+        {/* Semi-transparent front face outline */}
+        <mesh raycast={() => null}>
+          <planeGeometry args={[3 * spacing, 3 * spacing]} />
+          <meshBasicMaterial transparent opacity={0.04} color="#3b82f6" depthWrite={false} side={THREE.DoubleSide} />
+          <Edges scale={1} threshold={15} color="#3b82f6" opacity={0.8} transparent />
+        </mesh>
+        {/* Front text tag */}
+        <Text
+          position={[0, 1.5 * spacing + 0.28, 0]}
+          fontSize={0.26}
+          color="#1d4ed8"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#ffffff"
+          raycast={() => null}
+        >
+          FRONT (正面)
+        </Text>
+      </group>
 
       {/* Render blocks and interactive zones */}
       {cells.map(({ x, y, z }) => {
@@ -76,8 +99,17 @@ function Cell({ x, y, z, type, isBoundary, phase, toolMode, spacing, onInteract 
   const isBlackModeInvalid = toolMode === 'black' && !isBoundary;
 
   let color = '#ffffff';
-  if (type === 'white') color = '#fdf8e7'; // yellowish ivory
-  if (type === 'black') color = '#1e293b';
+  let edgeColor = '#475569';
+  if (type === 'white') {
+    color = '#fdf8e7'; // yellowish ivory
+    edgeColor = '#64748b';
+  } else if (type === 'red') {
+    color = '#ef4444'; // vibrant red
+    edgeColor = '#991b1b';
+  } else if (type === 'black') {
+    color = '#1e293b';
+    edgeColor = '#000000';
+  }
 
   return (
     <group position={[posX, posY, posZ]}>
@@ -88,9 +120,9 @@ function Cell({ x, y, z, type, isBoundary, phase, toolMode, spacing, onInteract 
           <meshStandardMaterial
             color={color}
             roughness={0.2}
-            metalness={type === 'black' ? 0.4 : 0.1}
+            metalness={type === 'black' ? 0.4 : 0.05}
           />
-          <Edges scale={1} threshold={15} color={type === 'white' ? '#475569' : '#000000'} />
+          <Edges scale={1} threshold={15} color={edgeColor} />
         </mesh>
       )}
 
@@ -121,7 +153,7 @@ function Cell({ x, y, z, type, isBoundary, phase, toolMode, spacing, onInteract 
           <meshBasicMaterial
             color={
               toolMode === 'erase' ? '#ef4444' :
-                (isBlackModeInvalid ? '#fbbf24' : '#3b82f6')
+                (isBlackModeInvalid ? '#fbbf24' : (toolMode === 'red' ? '#f87171' : '#3b82f6'))
             }
             transparent
             opacity={0.3}

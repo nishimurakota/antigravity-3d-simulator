@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import * as THREE from 'three';
 
-export type BlockType = 'white' | 'black' | 'empty';
-export type ToolMode = 'none' | 'white' | 'black' | 'erase';
+export type BlockType = 'white' | 'red' | 'black' | 'empty';
+export type ToolMode = 'none' | 'white' | 'red' | 'black' | 'erase';
 export type Phase = 'placement' | 'rotation';
 
 export interface BlockData {
@@ -23,6 +23,9 @@ export interface SimulationState {
   history: { grid: Record<string, BlockType>; orientation: [number, number, number, number] }[];
   future: { grid: Record<string, BlockType>; orientation: [number, number, number, number] }[];
 
+  // Trigger to smoothly reset camera to front
+  cameraResetTrigger: number;
+
   // Actions
   setToolMode: (mode: ToolMode) => void;
   setPhase: (phase: Phase) => void;
@@ -34,6 +37,7 @@ export interface SimulationState {
 
   undo: () => void;
   redo: () => void;
+  resetCamera: () => void;
 }
 
 const initialGrid: Record<string, BlockType> = {};
@@ -59,7 +63,7 @@ function simulateDrop(grid: Record<string, BlockType>, localGravity: THREE.Vecto
 
   const newGrid: Record<string, BlockType> = { ...grid };
   for (const key in newGrid) {
-    if (newGrid[key] === 'white') newGrid[key] = 'empty';
+    if (newGrid[key] === 'white' || newGrid[key] === 'red') newGrid[key] = 'empty';
   }
 
   for (let c1 = 0; c1 < 3; c1++) {
@@ -76,10 +80,10 @@ function simulateDrop(grid: Record<string, BlockType>, localGravity: THREE.Vecto
 
         if (currentType === 'black') {
           writePos = i + step;
-        } else if (currentType === 'white') {
+        } else if (currentType === 'white' || currentType === 'red') {
           const writeCoords: Record<string, number> = { [colAxes[0]]: c1, [colAxes[1]]: c2, [dropAxis]: writePos };
           const writeKey = `${writeCoords.x},${writeCoords.y},${writeCoords.z}`;
-          newGrid[writeKey] = 'white';
+          newGrid[writeKey] = currentType;
           writePos += step;
         }
       }
@@ -95,6 +99,7 @@ export const useStore = create<SimulationState>((set, get) => ({
   orientation: [0, 0, 0, 1],
   history: [],
   future: [],
+  cameraResetTrigger: 0,
 
   setToolMode: (mode) => set({ toolMode: mode }),
 
@@ -192,5 +197,9 @@ export const useStore = create<SimulationState>((set, get) => ({
       grid: copyGrid(nextState.grid),
       orientation: nextState.orientation
     });
+  },
+
+  resetCamera: () => {
+    set((state) => ({ cameraResetTrigger: state.cameraResetTrigger + 1 }));
   }
 }));
